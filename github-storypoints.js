@@ -1,7 +1,7 @@
 (function (d, w) {
 'use strict';
 
-var pointsRegEx = /^(\(([\d\.]+)\)\s*)?(.+?)(\s*\[([\d\.]+)\])?$/im; // new RegExp("^(\(([\d\.]+)\))?(.+)(\[([\d\.]+)\])?$", "i"); // Was: /^\(([\d\.]+)\)(.+)/i; 
+var pointsRegEx = /^(.+?)\s*(\((([\d\.]+)(\/([\d\.]+))?)\))?$/im;
 
 var debounce = function (func, wait, immediate) {
   var timeout;
@@ -66,11 +66,14 @@ var addStoryPointsForColumn = (column) => {
       const title = titleElementContainer.innerText;
       const story = (
         pointsRegEx.exec(titleElement.innerText) ||
-        [null, '0', titleElement.innerText]
+        [null, titleElement.innerText, null, null, '0', null, '0']
       );
-      const storyPoints = parseFloat(story[2]) || 0;
-      const storyTitle = story[3];
-      const spentPoints = parseFloat(story[5]) || 0;
+      const storyPoints = parseFloat(story[6]) || parseFloat(story[4]) || 0;
+      const storyTitle = story[1];
+      let spentPoints = parseFloat(story[4]) || 0;
+      if (!story[6]) {
+        spentPoints = 0
+      }
       return {
         element: card,
         titleElement,
@@ -132,13 +135,13 @@ var start = debounce(() => {
     const titleElement = issue.getElementsByClassName('h4')[0];
     const story = (
       pointsRegEx.exec(titleElement.innerText) ||
-      [null, '0', titleElement.innerText]
+      [null, titleElement.innerText, null, null, '0', null, '0']
     );
-    const storyPoints = parseFloat(story[2]) || 0;
-    const storyTitle = story[3];
-    const spentPoints = parseFloat(story[5]) || 0;
-    if (storyPoints || spentPoints) {
-      titleElement.innerHTML = titleWithPoints(storyTitle, storyPoints, spentPoints);
+    const storyPoints = parseFloat(story[6]) || parseFloat(story[4]) || 0;
+    const storyTitle = story[1];
+    let spentPoints = parseFloat(story[4]) || 0;
+    if (!story[6]) {
+      spentPoints = 0
     }
   }
 }, 50);
